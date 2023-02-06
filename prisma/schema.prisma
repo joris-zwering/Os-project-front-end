@@ -31,4 +31,8 @@ model Alerts {
   alertActive  Boolean @default(true)
   nodeId       Int
   node         Node    @relation(fields: [nodeId], references: [nodeId])
+  alertCreatedAt     DateTime @default(now())
+  temperature  Float?
+  humidity     Float?
+  pressure     Float?
 }

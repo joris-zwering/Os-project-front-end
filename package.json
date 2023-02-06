@@ -17,11 +17,13 @@
       "chart.js": "^4.2.0",
       "faker": "^6.6.6",
       "lodash": "^4.17.21",
+      "moment": "^2.29.4",
       "next": "13.1.6",
       "react": "18.2.0",
       "react-chartjs-2": "^5.2.0",
       "react-dom": "18.2.0",
-      "reactflow": "^11.5.3"
+      "reactflow": "^11.5.3",
+      "swr": "^2.0.3"
    },
    "devDependencies": {
       "@faker-js/faker": "^7.6.0",

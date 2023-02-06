@@ -1,7 +1,9 @@
 import { useCallback } from "react";
 import { Handle, Position } from "reactflow";
+import moment from "moment";
 
 export default function ESP32_NODE({ data }) {
+   console.log(data)
    return (
       <div
          style={{
@@ -33,9 +35,9 @@ export default function ESP32_NODE({ data }) {
                <div className="">
                   <div className="flex space-x-1">
                      <span className="font-semibold text-black text-sm">
-                        Temp:{" "}
+                        Temperature:{" "}
                      </span>
-                     <p className="text-black text-sm">30°C</p>
+                     <p className="text-black text-sm">{Math.round(data?.temp as number * 100) / 100} °C</p>
                   </div>
                   <hr className="mt-2 mb-2" />
                </div>
@@ -44,7 +46,7 @@ export default function ESP32_NODE({ data }) {
                      <span className="font-semibold text-black text-sm">
                         Humidity:{" "}
                      </span>
-                     <p className="text-black text-sm">30</p>
+                    <p className="text-black text-sm">{Math.round(data?.humidity as number * 100) / 100}%</p>
                   </div>
                   <hr className="mt-2 mb-2" />
                </div>
@@ -53,11 +55,11 @@ export default function ESP32_NODE({ data }) {
                      <span className="font-semibold text-black text-sm">
                         Pressure:{" "}
                      </span>
-                     <p className="text-black text-sm">xxx</p>
+                     <p className="text-black text-sm">{Math.round(data?.pressure as number * 100) / 100}</p>
                   </div>
                </div>
                 <hr className="mt-2 mb-2" />
-               <p className="text-black text-xs mt-3 text-gray-500">Last logged at: 4 feb 17:48</p>
+               <p className="text-black text-xs mt-3 text-gray-500">Last logged at: {moment(data?.lastLoggedAt).format('MMMM Do, h:mm a')}</p>
             </div>
          )}
 

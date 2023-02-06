@@ -14,6 +14,7 @@ import ReactFlow, {
 // 👇 you need to import the reactflow styles
 import "reactflow/dist/style.css";
 import ESP32_NODE from "@/components/nodes/esp32";
+import useSWR from "swr";
 
 const initialNodes = [
    { id: "base", position: { x: 300, y: 550 }, data: { label: "🏠 Base" } },
@@ -52,7 +53,13 @@ const initialEdges = [
 
 const nodeTypes = { ESP32: ESP32_NODE };
 
-const inter = Inter({ subsets: ["latin"] });
+const getLogsFetcher = (url) =>
+   fetch(url, {
+      method: "GET",
+      headers: {
+         "Content-Type": "application/json",
+      },
+   }).then((res) => res.json());
 
 export default function Home() {
    return (
@@ -77,10 +84,10 @@ export default function Home() {
                   <div>Modus:</div>
                   <div className="bg-white px-2 py-2 rounded-md space-x-2">
                      <div className="font-semibold text-md bg-gray-100 py-2 px-3 text-black inline rounded-md border-gray-300 border-2">
-                        Overview
+                        <a href="/stats"> Live</a>
                      </div>
                      <div className="font-medium text-md bg-gray-100 py-2 px-3 text-black inline rounded-md">
-                        Live
+                        <a href="/stats"> Stats</a>
                      </div>
                   </div>
                </div>
@@ -94,8 +101,9 @@ export default function Home() {
 }
 
 export function Flow() {
-   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+   const [nodes, setNodes, onNodesChange] = useNodesState([]);
+   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+   const { data, error } = useSWR("/api/logs", getLogsFetcher);
 
    const onConnect = useCallback(
       (params) => setEdges((eds) => addEdge(params, eds)),
@@ -106,7 +114,42 @@ export function Flow() {
 
    useEffect(() => {
       flow.setCenter(0, 0);
-   });
+   }, []);
+
+   useEffect(() => {
+      console.log(data);
+      if (data) {
+         const nodes = Object.keys(data);
+         setNodes(() => {
+            const items = nodes.map((node, key) => {
+               return {
+                  id: node,
+                  position: { x: 300 * key, y: 0 * key },
+                  data: {
+                     label: node,
+                     status: "healthy",
+                     temp: data?.[node]?.[0]?.["temperature"],
+                     humidity: data?.[node]?.[0]?.["humidity"],
+                     pressure: data?.[node]?.[0]?.["pressure"],
+                     lastLoggedAt: data?.[node]?.[0]?.["loggedAt"],
+                  },
+                  type: "ESP32",
+               };
+            });
+            items.push({
+               id: "base",
+               position: { x: nodes.length * 130, y: 550 },
+               data: { label: "🏠 Base" },
+            });
+            return items;
+         });
+         setEdges(() => {
+            return nodes.map((data, key) => {
+               return { id: `base-${key}`, source: data, target: "base" };
+            });
+         });
+      }
+   }, [data]);
 
    return (
       <ReactFlowProvider>

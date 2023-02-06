@@ -3,9 +3,9 @@ import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import _ from "lodash";
 
-async function upsertNode({ nodeId }: { nodeId: number }) {
-   const prisma = new PrismaClient();
+const prisma = new PrismaClient();
 
+async function upsertNode({ nodeId }: { nodeId: number }) {
    await prisma.node.upsert({
       where: {
          nodeId: nodeId,
@@ -20,11 +20,22 @@ async function upsertNode({ nodeId }: { nodeId: number }) {
    await prisma.$disconnect();
 }
 
-async function createAlert({ nodeId }: { nodeId: number }) {
-   const prisma = new PrismaClient();
-
+async function createAlert({
+   nodeId,
+   temperature,
+   humidity,
+   pressure,
+}: {
+   nodeId: number;
+   temperature: number;
+   humidity: number;
+   pressure: number;
+}) {
    await prisma.alerts.create({
       data: {
+         pressure: pressure,
+         humidity: humidity,
+         temperature: temperature,
          node: {
             connect: {
                nodeId: nodeId,
@@ -35,61 +46,46 @@ async function createAlert({ nodeId }: { nodeId: number }) {
    await prisma.$disconnect();
 }
 
-async function getLogsFromNode(nodeId: number) {
-   const prisma = new PrismaClient();
-   const data = await prisma.log.findMany({
+async function getActiveAlerts() {
+   const data = await prisma.alerts.findMany({
       where: {
+         alertActive: true,
+      },
+      distinct: ["nodeId"],
+   });
+   return data;
+}
+
+async function deleteAlertForNodes(nodeId) {
+   await prisma.alerts.updateMany({
+      where: {
+         alertActive: true,
          nodeId: nodeId,
       },
-      select: {
-         node: true,
-         loggedAt: true,
-         logId: true,
-         temperature: true,
-         pressure: true,
-         humidity: true,
+      data: {
+         alertActive: false,
       },
    });
-   return data;
 }
-
-async function getAllLogsPerNode() {
-   const prisma = new PrismaClient();
-   const data = await prisma.log.findMany({
-      select: {
-         node: true,
-         loggedAt: true,
-         logId: true,
-         temperature: true,
-         pressure: true,
-         humidity: true,
-      },
-   });
-   return data;
-}
-
-const expectedLogs = [
-   {
-      node: 4,
-      hum: 30,
-      temp: 22,
-      pres: 30,
-      logged_at: 1675770480,
-   },
-];
 
 export default async function handler(
    req: NextApiRequest,
    res: NextApiResponse
 ) {
    if (req.method === "POST") {
-      req.body.map(async (log) => {
-         console.log(log);
-         await upsertNode({ nodeId: log.nodeId });
-         await createAlert({
-            nodeId: log.nodeId,
-         });
+      await upsertNode({ nodeId: req.body.nodeId });
+      await createAlert({
+         nodeId: req.body.nodeId,
+         temperature: req.body.temperature,
+         humidity: req.body.humidity,
+         pressure: req.body.pressure,
       });
       res.status(200).json({ succeed: true });
+   } else if (req.method === "GET") {
+      const alerts = await getActiveAlerts();
+      res.status(200).json({ ...alerts });
+   } else if (req.method === "DELETE" && req.query.nodeId) {
+      await deleteAlertForNodes(parseInt(req.query.nodeId as string));
+      res.status(200).json({ success: true });
    }
 }

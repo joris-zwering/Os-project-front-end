@@ -3,9 +3,8 @@ import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import _ from "lodash";
 
+const prisma = new PrismaClient();
 async function upsertNode({ nodeId }: { nodeId: number }) {
-   const prisma = new PrismaClient();
-
    await prisma.node.upsert({
       where: {
          nodeId: nodeId,
@@ -33,8 +32,6 @@ async function createLog({
    pressure: number;
    loggedAt: Date;
 }) {
-   const prisma = new PrismaClient();
-
    await prisma.log.create({
       data: {
          node: {
@@ -52,7 +49,6 @@ async function createLog({
 }
 
 async function getLogsFromNode(nodeId: number) {
-   const prisma = new PrismaClient();
    const data = await prisma.log.findMany({
       where: {
          nodeId: nodeId,
@@ -65,12 +61,14 @@ async function getLogsFromNode(nodeId: number) {
          pressure: true,
          humidity: true,
       },
+      orderBy: {
+         loggedAt: "asc",
+      },
    });
    return data;
 }
 
 async function getAllLogsPerNode() {
-   const prisma = new PrismaClient();
    const data = await prisma.log.findMany({
       select: {
          node: true,
@@ -79,6 +77,9 @@ async function getAllLogsPerNode() {
          temperature: true,
          pressure: true,
          humidity: true,
+      },
+      orderBy: {
+         loggedAt: "desc",
       },
    });
    return data;
