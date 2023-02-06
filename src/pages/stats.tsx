@@ -34,6 +34,70 @@ export const options = {
 };
 const labels = ["12:00", "12:01", "12:02", "12:03", "12:04", "12:05"];
 
+// GET LOGS FROM last 5 min
+const exampleResponse = [
+   {
+      nodeId: 1,
+      logs: [
+         {
+            logId: 1,
+            loggedAt: Date.now(),
+            temperature: 20,
+            humidity: 22,
+            pressure: 20,
+         },
+      ],
+   },
+   {
+      nodeId: 2,
+      logs: [
+         {
+            logId: 1,
+            loggedAt: Date.now(),
+            temperature: 20,
+            humidity: 22,
+            pressure: 20,
+         },
+      ],
+   },
+   {
+      nodeId: 3,
+      logs: [
+         {
+            logId: 1,
+            loggedAt: Date.now(),
+            temperature: 20,
+            humidity: 22,
+            pressure: 20,
+         },
+      ],
+   },
+   {
+      nodeId: 4,
+      logs: [
+         {
+            logId: 1,
+            loggedAt: Date.now(),
+            temperature: 20,
+            humidity: 22,
+            pressure: 20,
+         },
+      ],
+   },
+   {
+      nodeId: 5,
+      logs: [
+         {
+            logId: 1,
+            loggedAt: Date.now(),
+            temperature: 20,
+            humidity: 22,
+            pressure: 20,
+         },
+      ],
+   },
+];
+
 export const data = {
    labels,
    datasets: [
@@ -169,10 +233,10 @@ export default function Home() {
                      className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6"
                   >
                      <dt className="truncate text-sm font-medium text-gray-500">
-                        Lifevests
+                        Active lifevests
                      </dt>
                      <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
-                        20
+                        12
                      </dd>
                   </div>
                   <div
