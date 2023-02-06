@@ -103,7 +103,9 @@ export default function Home() {
 export function Flow() {
    const [nodes, setNodes, onNodesChange] = useNodesState([]);
    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-   const { data, error } = useSWR("/api/logs", getLogsFetcher);
+   const { data, error } = useSWR("/api/logs", getLogsFetcher, {
+      refreshInterval: 1,
+   });
 
    const onConnect = useCallback(
       (params) => setEdges((eds) => addEdge(params, eds)),
